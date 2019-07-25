@@ -52,7 +52,7 @@ struct tp_comm_buffer {
     uint16_t rx_ptr_in;
     uint16_t rx_ptr_out;
     uint16_t rx_length;
-    uint8_t rx_tmp;
+    volatile uint8_t rx_tmp;
 };
 
 #define DECLARE_COMM_BUFFER(NAME, TX_SIZE, RX_SIZE)                                                                    \

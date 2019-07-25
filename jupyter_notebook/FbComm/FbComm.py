@@ -100,7 +100,7 @@ class FbComm:
         print('Receive results...')
         inp_buf = bytearray
         if self._serial:
-            self._serial.timeout = 20
+            self._serial.timeout = 2
             inp_buf = self._serial.read(92)
         if self._tcp_client:
             inp_buf = self.recvDataTcp()
@@ -123,8 +123,8 @@ class FbComm:
 
 
 if __name__=="__main__":
-    com = FbComm(ip='127.0.0.1', port=32001)
-    # com = FbComm(uart='/dev/ttyUSB0')
+    # com = FbComm(ip='127.0.0.1', port=32001)
+    com = FbComm(uart='/dev/ttyUSB1')
     com.reqStats()
 
     # digit = np.load('../digit.txt.npy')

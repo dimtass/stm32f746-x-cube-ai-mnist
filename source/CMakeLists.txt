@@ -61,7 +61,7 @@ endif()
 
 # Add the arch independent C lib
 include (cmake/noarch_c_lib.cmake)
-include (cmake/flatcc.cmake)
+include (cmake/flatbuffers_lib.cmake)
 
 # force stm builds to debug.  This is a hack as when release is set, it automatically 
 # sets the invalid -O3 flag on the assembler.
@@ -80,7 +80,7 @@ enable_language(ASM)
 set (STM32F7_ARCH "-mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard")
 set (CMAKE_C_FLAGS "${COMPILER_OPTIMISATION} ${STM32F7_DEFINES} \
                 ${STM32F7_ARCH} \
-                -fmessage-length=0 -ffunction-sections -fmessage-length=0 \
+                -fmessage-length=0 -ffunction-sections -fmessage-length=0 -std=c11 \
                 -Wall -lm -specs=nosys.specs -specs=nano.specs -u _printf_float \
                 -mabi=aapcs -fno-unroll-loops -ffast-math -ftree-vectorize")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} " CACHE INTERNAL "c compiler flags")
