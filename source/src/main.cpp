@@ -457,7 +457,7 @@ void dbg_uart_parser(uint8_t *buffer, size_t bufferlen)
         uint8_t mode = atoi((const char *)&buffer[4]);
         switch (mode) {
         case 1:
-            RunInference(&tf, (float *)digit, 784);
+            RunInference((float*)digit, 784);
             break;
         case 2:
             break;
