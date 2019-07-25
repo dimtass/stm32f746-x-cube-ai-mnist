@@ -29,7 +29,8 @@
 #include "debug_trace.h"
 #include "stm32f7_helper_func.h"
 #include "timer_sched.h"
-// #include "mnist_schema_generated.h"
+#include "schema_builder.h"
+#include "schema_verifier.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,6 +43,11 @@
 #define CODE_VERSION 100
 #define UART_BUFFER_SIZE 256
 #define FB_UART_BUFFER_SIZE 4096
+
+// #undef ns
+// #define ns(x) FLATBUFFERS_WRAP_NAMESPACE(MnistProt, x) // Specified in the schema.
+// A helper to simplify creating vectors from C-arrays.
+#define c_vec_len(V) (sizeof(V)/sizeof((V)[0]))
 
 #ifdef __GNUC__
 /* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
@@ -384,7 +390,17 @@ void dbg_uart_parser(uint8_t *buffer, size_t bufferlen, uint8_t sender)
 
 void fb_uart_parser(uint8_t *buffer, size_t bufferlen, uint8_t sender)
 {
-    // TRACE(("fb_uart_parser: %d\n", bufferlen));
+    TRACE(("fb_uart_parser: %d\n", bufferlen));
+    flatcc_builder_t builder; //, *b;
+    int ret;
+    // flatcc_builder_t *b;
+    // b= &builder;
+
+    if ((ret = MnistProt_Stats_verify_as_root(buffer, bufferlen))) {
+        TRACE(("[FB]: Invalid flatbuffer data received: %s\n",
+                flatcc_verify_error_string(ret)));
+    }
+
     // auto req = MnistProt::GetCommands(buffer);
 
     // flatbuffers::Verifier verifier(reinterpret_cast<unsigned char*>(buffer),bufferlen);

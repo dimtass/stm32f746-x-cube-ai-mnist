@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libflatccrt.a  CMakeFiles/flatccrt.dir/builder.c.o CMakeFiles/flatccrt.dir/emitter.c.o CMakeFiles/flatccrt.dir/refmap.c.o CMakeFiles/flatccrt.dir/verifier.c.o CMakeFiles/flatccrt.dir/json_parser.c.o CMakeFiles/flatccrt.dir/json_printer.c.o
+/usr/bin/ranlib ../../lib/libflatccrt.a
