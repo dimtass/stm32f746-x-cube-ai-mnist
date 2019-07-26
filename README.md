@@ -1,4 +1,4 @@
-MNIST inference on STM32F746 using TensorFlow Lite for Microcontrollers
+MNIST inference on STM32F746 using X-CUBE-AI
 ----
 
 In this project you can evaluate the MNIST database or your hand-written
@@ -10,7 +10,7 @@ changes that are needed.
 The base project is derived from my CMAKE template for the STM32F7xx
 [here](https://bitbucket.org/dimtass/stm32f7xx_cmake_template).
 
-> Note: This project derived from this blog post [here](https://www.stupid-projects.com/machine-learning-on-embedded-part-3/)
+> Note: This project derived from this blog post [here](https://www.stupid-projects.com/machine-learning-on-embedded-part-4/)
 The whole series starts from [here](https://www.stupid-projects.com/machine-learning-on-embedded-part-1/)
 
 ## Usage
@@ -38,15 +38,24 @@ jupyter notebook
 And then browse to the `jupyter_notebook/MNIST-TensorFlow.ipynb`
 and run/use the notebook.
 
+## Cloning the code
+Because this repo has dependencies on other submodules, in order to
+fetch the repo use the following command:
+
+```sh
+git clone --recursive -j8 git@bitbucket.org:dimtass/stm32f746-x-cube-ai-mnist.git
+
+# or for http
+git clone --recursive -j8 https://dimtass@bitbucket.org/dimtass/stm32f746-x-cube-ai-mnist.git
+```
+
 ## Build
 
 To select the which libraries you want to use you need to provide
 cmake with the proper options. By default all the options are set
 to `OFF`. The supported options are:
 
-* `USE_CORTEX_NN`: If set to `ON` then the project will build using the DSP/NN libs
-* `USE_HAL_DRIVER`: If set to `ON` enables the HAL Driver library
-* `USE_FREERTOS`: If set to `ON` enables FreeRTOS
+* `USE_HAL_DRIVER`: If set to `ON` enables the HAL Driver library (enabled by default)
 
 You also need to provide cmake with the source folder by pointing
 the folder to the `SRC` parameter.
@@ -54,39 +63,11 @@ the folder to the `SRC` parameter.
 Finally, you also need to provide the path of the toolchain to
 use in the `CMAKE_TOOLCHAIN`.
 
-You can build 3 different version of this code. The one is use the
-default `depthwise_conv` function, the other is to build the `portable_optimized`
-version and last to build the `cmsis-nn` version. For the first two,
-you have to select the proper version inside the `cmake/tensorflow_lite_micro.cmake`
-file, where you'll see the following lines:
-
-```cmake
-set(TENSORFLOW_LITE_SRC
-    # ${TENSORFLOW_LITE_DIR}/lite/experimental/micro/kernels/depthwise_conv.cc
-    ${TENSORFLOW_LITE_DIR}/lite/experimental/micro/kernels/portable_optimized/depthwise_conv.cc
-)
-```
-
-By default, the `portable_optimized` version is selected, but you can comment
-that line and uncomment the other one. Then you can build with the
-following command:
+You can build the code with the following command:
 
 ```sh
-CLEANBUILD=true USE_HAL_DRIVER=ON SRC=src ./build.sh
+CLEANBUILD=true ./build.sh
 ```
-
-To build the binary using the Cortex-M and NN libs, then you need
-to run the following command:
-
-```sh\
-CLEANBUILD=true USE_HAL_DRIVER=ON USE_CORTEX_NN=ON SRC=src ./build.sh
-```
-
-> Note: `CLEANBUILD=true` is only needed if you need to make a clean build
-otherwise you can skip it. When it's used then depending on your machine
-it will take quite some time as I'm building all the DSP and NN libs files.
-To make it a bit faster you can remove the files that are not needed in
-`cmake/cmsis_dsp_lib.cmake`.
 
 ## Overclocking
 I've added an overclocking flag that overclocks the CPU @ 280. That's maybe
@@ -100,14 +81,23 @@ lines here:
 #endif
 ```
 
+There are also two additional changes for the APB1 and APB2 buses clocks.
+
+```cpp
+#ifdef OVERCLOCK
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
+#endif
+```
+
 You can change that number to the frequency you like. Then you need to build
 with the `USE_OVERCLOCK" flag, like this:
 ```sh
-CLEANBUILD=true USE_OVERCLOCK=ON USE_HAL_DRIVER=ON USE_CORTEX_NN=ON SRC=src ./build.sh
+CLEANBUILD=true USE_OVERCLOCK=ON ./build.sh
 ```
 
 > Warning: Any overclocking may be the source of unknown issues you may have.
-In my case I was able to OC up to 285MHz, but sometimes the flatbuffers API was
+In my case I was able to OC up to 288 MHz, but sometimes the flatbuffers API was
 failing at that high frequency! Especially avoid developing with OC.
 
 ## Using CubeMX
@@ -131,18 +121,6 @@ The files that usually you need to get and place them in your
 In your case there might be more files. Usually are the files
 that are in the exported `Inc` and `Src` folder.
 
-
-## Cloning the code
-Because this repo has dependencies on other submodules, in order to
-fetch the repo use the following command:
-
-```sh
-git clone --recursive -j8 git@bitbucket.org:dimtass/stm32f746-tflite-micro-mnist.git
-
-# or for http
-git clone --recursive -j8 https://dimtass@bitbucket.org/dimtass/stm32f746-tflite-micro-mnist.git
-```
-
 ## Flash
 To flash the HEX file in windows use st-link utility like this:
 ```"C:\Program Files (x86)\STMicroelectronics\STM32 ST-LINK Utility\ST-LINK Utility\ST-LINK_CLI.exe" -c SWD -p build-stm32\src_\stm32-cmake-template.hex -Rst```
@@ -151,30 +129,6 @@ To flash the bin in Linux:
 ```st-flash --reset write build-stm32/src/stm32-cmake-template.bin 0x8000000```
 
 Just replace `src` with the proper folder in your case
-
-## Testing
-I've also added a script to test the current supported default projects.
-To use it just run:
-
-```sh
-./test.sh
-```
-
-If everything goes right you should see something like this:
-
-```sh
-Building test case: CLEANBUILD=true USE_HAL_DRIVER=ON SRC=src_c_hal
----RESULT: SUCCESS
-
-Building test case: CLEANBUILD=true USE_HAL_DRIVER=ON USE_FREERTOS=ON SRC=src_c_freertos
----RESULT: SUCCESS
-
-Building test case: CLEANBUILD=true USE_HAL_DRIVER=ON SRC=src_cpp_hal
----RESULT: SUCCESS
-
-Building test case: CLEANBUILD=true USE_HAL_DRIVER=ON USE_FREERTOS=ON SRC=src_cpp_freertos
----RESULT: SUCCESS
-```
 
 ## Flatbuffers
 You might need to use Google's flatbuffers in case you want to experiment

@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.6)
 
-project(stm32f7-mnist-tflite LANGUAGES C CXX)
+project(stm32f7-mnist-x_cube_ai LANGUAGES C CXX)
 
 option(USE_CORTEX_NN "Use Cortex-M7 DSP/NN lib" ON)
 option(USE_STM_AI "Use STM AI library" ON)
